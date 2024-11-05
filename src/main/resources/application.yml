@@ -1,0 +1,18 @@
+spring:
+  datasource:
+    password: pass
+    username: postgres
+    url: jdbc:postgresql://localhost:5432/my_database_test
+
+  kafka:
+#    topic.name: springBootTopic
+
+    producer:
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+#      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+    consumer:
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+#      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    bootstrap-servers: localhost:29092
+#    admin:
+#      auto-create: true
