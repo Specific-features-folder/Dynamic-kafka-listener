@@ -19,7 +19,7 @@ public class KafkaErrorHandlerApplication {
 		ThreadLocalRandom currentRandom = ThreadLocalRandom.current();
 		System.out.println(Instant.now().toString());
 
-		if (scanner.nextInt() == 111)
+		while (scanner.nextLine().equals("send"))
 			kafkaTemplate.send("my-topic", new Lada("model-" + currentRandom.nextInt(),
 					Instant.now()));
 	}
