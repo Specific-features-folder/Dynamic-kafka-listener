@@ -2,7 +2,7 @@ package com.barabanov;
 
 import java.time.Instant;
 
-public record Lada(
+public record Car(
         String model,
         Instant createDate) {
 }

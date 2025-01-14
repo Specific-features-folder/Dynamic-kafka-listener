@@ -19,9 +19,18 @@ public class KafkaErrorHandlerApplication {
 		ThreadLocalRandom currentRandom = ThreadLocalRandom.current();
 		System.out.println(Instant.now().toString());
 
-		while (scanner.nextLine().equals("send"))
-			kafkaTemplate.send("my-topic", new Lada("model-" + currentRandom.nextInt(),
-					Instant.now()));
+//		List<String> modelNames = List.of("Vaz", "Lada", "Gaz", "Yaz", "Belaz", "Kamaz");
+//		modelNames.forEach(name -> {
+//			kafkaTemplate.send("car-topic", new Car(name,
+//					Instant.now()));
+//		});
+//		for (int i = 0; i < 4_000_000; i++) {
+//			kafkaTemplate.send("car-topic", new Car("model-" + i,
+//					Instant.now()));
+//		}
+//		while (scanner.nextLine().equals("send"))
+//			kafkaTemplate.send("car-topic", new Car("model-" + currentRandom.nextInt(),
+//					Instant.now()));
 	}
 
 }
