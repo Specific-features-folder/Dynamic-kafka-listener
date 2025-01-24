@@ -13,7 +13,7 @@ spring:
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       group-id: abcccccccccccccccc
 
-    bootstrap-servers: localhost:9092
+    bootstrap-servers: localhost:9093
 
 #    #listener:
 #     # concurrency: 1
@@ -21,24 +21,32 @@ spring:
 #    #admin:
 #     # auto-create: true
 
-kafka.shard.config:
-  shard-a:
-    kafka-brokers: localhost:9092
-    topics-properties:
-      request-topic:
-        name: request-topic
-        concurrency: 1
-        poll-timeout: 500
-        max-poll-records: 1000
-      response-topic:
-        name: response-topic
-  shard-b:
-    kafka-brokers: kafka-url-2
-    topics-properties:
-      request-topic:
-        name: my-request-topic-2
-        concurrency: 1
-        poll-timeout: 500
-        max-poll-records: 1000
-      response-topic:
-        name: their-response-topic-2
+kafka.shard:
+  config:
+    shard-a:
+      topics:
+        request-topic: request-topic
+        response-topic: response-topic
+      properties:
+        producer:
+          value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+          key-serializer: org.apache.kafka.common.serialization.StringSerializer
+        consumer:
+          value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+          key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+          group-id: abcr
+        bootstrap-servers: localhost:29092
+
+    shard-b:
+      topics:
+        request-topic: request-topic
+        response-topic: response-topic
+      properties:
+        producer:
+          value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+          key-serializer: org.apache.kafka.common.serialization.StringSerializer
+        consumer:
+          value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+          key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+          group-id: abcd
+        bootstrap-servers: localhost:29093

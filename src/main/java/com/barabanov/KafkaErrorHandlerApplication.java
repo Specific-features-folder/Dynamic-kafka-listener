@@ -22,7 +22,7 @@ public class KafkaErrorHandlerApplication {
 		KafkaTemplate<String, Object> kafkaTemplate = context.getBean(KafkaTemplate.class);
 		Scanner scanner = new Scanner(System.in);
 		ThreadLocalRandom currentRandom = ThreadLocalRandom.current();
-		System.out.println(Instant.now().toString());
+//		System.out.println(Instant.now().toString());
 
 //		List<String> modelNames = List.of("Vaz", "Lada", "Gaz", "Yaz", "Belaz", "Kamaz");
 //		modelNames.forEach(name -> {

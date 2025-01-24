@@ -1,5 +1,9 @@
 package com.barabanov.dynamically.kafka.listener;
 
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import java.util.Map;
@@ -10,14 +14,13 @@ public record KafkaShardsProperties(
 
 
     public record KafkaShardProperties(
-            String kafkaBrokers,
-            Map<String, TopicProperties> topicsProperties
+            Map<String, String> topics,
+            ShardKafkaProperties properties
     ) {}
 
-    public record TopicProperties(
-            String name,
-            Integer concurrency,
-            Long pollTimeout,
-            Integer maxPollRecords
-            ) {}
+
+    @Data
+    @EqualsAndHashCode(callSuper = true)
+    @NoArgsConstructor
+    public static class ShardKafkaProperties extends KafkaProperties {}
 }
