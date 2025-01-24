@@ -18,7 +18,10 @@ public class KafkaConsumer {
     private final DataSource dataSource;
 
     @KafkaListener(topics = "car-topic",
-            properties = "spring.json.value.default.type=com.barabanov.Car")
+            properties = "spring.json.value.default.type=com.barabanov.Car",
+            id = "my-id",
+            idIsGroup = false,
+            concurrency = "3")
     public void listenMsg(Car car) {
 //        if (!isDatabaseAvailable())
 //            throw new RuntimeException("Ошибка из-за отключенной БД");
