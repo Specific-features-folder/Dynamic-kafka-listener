@@ -15,8 +15,13 @@ public class KafkaMessageListenerImpl<K, V> implements MessageListener<K, V> {
 
     @Override
     public void onMessage(ConsumerRecord<K, V> consumerRecord) {
-        log.info("Получена запись из кафки {} из топика {}", kafkaName, consumerRecord.topic());
+        try {
+            log.info("Получена запись из кафки {} из топика {}", kafkaName, consumerRecord.topic());
 
-        kafkaMessageHandler.handle(consumerRecord.value());
+            kafkaMessageHandler.handle(consumerRecord.value());
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+
     }
 }

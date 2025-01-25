@@ -22,7 +22,7 @@ import java.util.*;
 @Configuration
 public class ShardsKafkaConfiguration {
 
-    private static final String RESPONSE_TOPIC_PROPERTY = "response-topic";
+    private static final String REQUEST_TOPIC_PROPERTY = "request-topic";
 
 
     @Bean
@@ -48,13 +48,13 @@ public class ShardsKafkaConfiguration {
                                                                      ShardKafkaConfig shardProperties,
                                                                      KafkaMessageHandler<Response> resposeKafkaMessageHandler) {
 
-        MethodKafkaListenerEndpoint<String, Response> responseKafkaEndPoint = createDefaultMethodKafkaListenerEndpoint(
+        MethodKafkaListenerEndpoint<String, Response> requestKafkaEndPoint = createDefaultMethodKafkaListenerEndpoint(
                 shardName,
-                shardProperties.topics().get(RESPONSE_TOPIC_PROPERTY),
+                shardProperties.topics().get(REQUEST_TOPIC_PROPERTY),
                 resposeKafkaMessageHandler,
                 "rsp");
 
-        return List.of(responseKafkaEndPoint);
+        return List.of(requestKafkaEndPoint);
     }
 
 

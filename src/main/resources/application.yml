@@ -15,6 +15,9 @@ spring:
 
     bootstrap-servers: localhost:9093
 
+kafka-config:
+  request-topic-name: subsystem-request-topic
+
 #    #listener:
 #     # concurrency: 1
 #     # poll-timeout: 1000
@@ -34,6 +37,9 @@ shards.kafka.config:
         value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
         key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
         group-id: abcr
+        properties:
+          spring.json.trusted.packages: "*"
+          spring.json.value.default.type: "com.barabanov.dynamically.kafka.listener.Response"
       bootstrap-servers: localhost:29092
 
   shard-b:
@@ -48,6 +54,8 @@ shards.kafka.config:
         value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
         key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
         group-id: abcd
+        properties:
+          spring.json.trusted.packages: "*"
       listener:
         concurrency: 3
         poll-timeout: 1000
