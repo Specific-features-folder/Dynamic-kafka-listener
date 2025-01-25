@@ -1,6 +1,8 @@
 package com.barabanov.dynamically.kafka.listener;
 
+import com.barabanov.dynamically.kafka.listener.ShardsKafkaConfigs.ShardKafkaConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
@@ -27,12 +29,12 @@ public class ShardsKafkaConfiguration {
     public Map<String, List<KafkaListenerEndpoint>> shardsKafkaEndpoints(ShardsKafkaConfigs shardsKafkaConfigs,
                                                                          KafkaMessageHandler<Response> resposeKafkaMessageHandler) {
 
-        Map<String, ShardsKafkaConfigs.ShardKafkaConfig> shardsKafkaConfigMap = shardsKafkaConfigs.config();
+        Map<String, ShardKafkaConfig> shardsKafkaConfigMap = shardsKafkaConfigs.config();
         if (CollectionUtils.isEmpty(shardsKafkaConfigMap))
             return Collections.emptyMap();
 
         Map<String, List<KafkaListenerEndpoint>> shardsKafkaEndpoints = new HashMap<>();
-        for (Map.Entry<String, ShardsKafkaConfigs.ShardKafkaConfig> shardKafkaConfig : shardsKafkaConfigMap.entrySet()) {
+        for (Map.Entry<String, ShardKafkaConfig> shardKafkaConfig : shardsKafkaConfigMap.entrySet()) {
             String shardName = shardKafkaConfig.getKey();
             List<KafkaListenerEndpoint> endPointsForShard = createKafkaEndPointsForShard(shardName, shardKafkaConfig.getValue(), resposeKafkaMessageHandler);
             shardsKafkaEndpoints.put(shardName, endPointsForShard);
@@ -43,7 +45,7 @@ public class ShardsKafkaConfiguration {
 
 
     private List<KafkaListenerEndpoint> createKafkaEndPointsForShard(String shardName,
-                                                                     ShardsKafkaConfigs.ShardKafkaConfig shardProperties,
+                                                                     ShardKafkaConfig shardProperties,
                                                                      KafkaMessageHandler<Response> resposeKafkaMessageHandler) {
 
         MethodKafkaListenerEndpoint<String, Response> responseKafkaEndPoint = createDefaultMethodKafkaListenerEndpoint(
@@ -85,16 +87,20 @@ public class ShardsKafkaConfiguration {
     public Map<String, ConcurrentKafkaListenerContainerFactory<Object, Object>> shardsKafkaListenerContainerFactories(
             ShardsKafkaConfigs shardsKafkaConfigs) {
 
-        //TODO: посмотреть как задаются concurrency и другие настройки
-        Map<String, ShardsKafkaConfigs.ShardKafkaConfig> shardsKafkaConfigMap = shardsKafkaConfigs.config();
+        Map<String, ShardKafkaConfig> shardsKafkaConfigMap = shardsKafkaConfigs.config();
         if (CollectionUtils.isEmpty(shardsKafkaConfigMap))
             return Collections.emptyMap();
 
         Map<String, ConcurrentKafkaListenerContainerFactory<Object, Object>> shardsKafkaListenerContainerFactories = new HashMap<>();
-        for (Map.Entry<String, ShardsKafkaConfigs.ShardKafkaConfig> shardKafkaConfig : shardsKafkaConfigMap.entrySet()) {
-            DefaultKafkaConsumerFactory<Object, Object> kafkaConsumerFactory = new DefaultKafkaConsumerFactory<>(shardKafkaConfig.getValue().properties().buildConsumerProperties());
-            ConcurrentKafkaListenerContainerFactory<Object, Object> kafkaListenerContainerFactory = new ConcurrentKafkaListenerContainerFactory<>();
-            kafkaListenerContainerFactory.setConsumerFactory(kafkaConsumerFactory);
+        for (Map.Entry<String, ShardKafkaConfig> shardKafkaConfig : shardsKafkaConfigMap.entrySet()) {
+            ShardsKafkaConfigs.ShardKafkaProperties shardKafkaProperties = shardKafkaConfig.getValue().properties();
+
+            DefaultKafkaConsumerFactory<Object, Object> kafkaConsumerFactory = new DefaultKafkaConsumerFactory<>(shardKafkaProperties.buildConsumerProperties());
+
+            ConcurrentKafkaListenerContainerFactory<Object, Object> kafkaListenerContainerFactory = configureListenerContainerFactory(
+                    new ConcurrentKafkaListenerContainerFactory<>(),
+                    kafkaConsumerFactory,
+                    shardKafkaProperties);
 
             shardsKafkaListenerContainerFactories.put(shardKafkaConfig.getKey(), kafkaListenerContainerFactory);
         }
@@ -103,15 +109,35 @@ public class ShardsKafkaConfiguration {
     }
 
 
+    private ConcurrentKafkaListenerContainerFactory<Object, Object> configureListenerContainerFactory(
+            ConcurrentKafkaListenerContainerFactory<Object, Object> listenerContainerFactory,
+            DefaultKafkaConsumerFactory<Object, Object> consumerFactory,
+            KafkaProperties kafkaProperties) {
+        //TODO: Такая конфигурация не совсем корректная и часть KafkaProperties не будут работать (та что в блоке listener и не только.
+        // Неработающими properties будут properties, задаваемые в ConcurrentKafkaListenerContainerFactoryConfigurer.configure, за исключением concurrency и pollTimeout)
+        // Для исправления этого необходимо либо вручную конфигурировать ConcurrentKafkaListenerContainerFactory,
+        // либо конфигурировать ConcurrentKafkaListenerContainerFactoryConfigurer, как это делается в KafkaAnnotationDrivenConfiguration
+
+        listenerContainerFactory.setConsumerFactory(consumerFactory);
+
+        KafkaProperties.Listener listenerProperties = kafkaProperties.getListener();
+        Optional.ofNullable(listenerProperties.getConcurrency()).ifPresent(listenerContainerFactory::setConcurrency);
+        Optional.ofNullable(listenerProperties.getPollTimeout()).ifPresent(pollTimeoutDuration ->
+                listenerContainerFactory.getContainerProperties().setPollTimeout(pollTimeoutDuration.toMillis()));
+
+        return listenerContainerFactory;
+    }
+
+
     @Bean
     public Map<String, KafkaTemplate<Object, Object>> shardsKafkaTemplates(ShardsKafkaConfigs shardsKafkaConfigs) {
 
-        Map<String, ShardsKafkaConfigs.ShardKafkaConfig> shardsKafkaConfigMap = shardsKafkaConfigs.config();
+        Map<String, ShardKafkaConfig> shardsKafkaConfigMap = shardsKafkaConfigs.config();
         if (CollectionUtils.isEmpty(shardsKafkaConfigMap))
             return Collections.emptyMap();
 
         Map<String, KafkaTemplate<Object, Object>> shardsKafkaTemplates = new HashMap<>();
-        for (Map.Entry<String, ShardsKafkaConfigs.ShardKafkaConfig> shardKafkaConfig : shardsKafkaConfigMap.entrySet()) {
+        for (Map.Entry<String, ShardKafkaConfig> shardKafkaConfig : shardsKafkaConfigMap.entrySet()) {
 
             DefaultKafkaProducerFactory<Object, Object> kafkaProducerFactory = new DefaultKafkaProducerFactory<>(shardKafkaConfig.getValue().properties().buildProducerProperties());
             KafkaTemplate<Object, Object> kafkaTemplate = new KafkaTemplate<>(kafkaProducerFactory);

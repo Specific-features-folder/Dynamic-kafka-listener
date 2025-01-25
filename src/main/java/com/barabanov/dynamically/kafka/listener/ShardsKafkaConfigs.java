@@ -16,11 +16,13 @@ public record ShardsKafkaConfigs(
     public record ShardKafkaConfig(
             Map<String, String> topics,
             ShardKafkaProperties properties
-    ) {}
+    ) {
+    }
 
 
     @Data
     @EqualsAndHashCode(callSuper = true)
     @NoArgsConstructor
-    public static class ShardKafkaProperties extends KafkaProperties {}
+    public static class ShardKafkaProperties extends KafkaProperties {
+    }
 }

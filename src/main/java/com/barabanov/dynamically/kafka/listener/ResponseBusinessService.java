@@ -12,6 +12,6 @@ public class ResponseBusinessService implements KafkaMessageHandler<Response> {
 
     @Override
     public void handle(Response msg) {
-        log.info("Обработываем сообщение {}", msg);
+        log.info("Обрабатываем сообщение {}", msg);
     }
 }

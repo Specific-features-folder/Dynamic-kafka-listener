@@ -1,13 +1,11 @@
 package com.barabanov;
 
-import com.barabanov.dynamically.kafka.listener.KafkaConsumerRegisterService;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.kafka.core.KafkaTemplate;
 
-import java.util.Arrays;
 import java.util.Scanner;
 import java.util.concurrent.ThreadLocalRandom;
 

@@ -48,4 +48,7 @@ shards.kafka.config:
         value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
         key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
         group-id: abcd
+      listener:
+        concurrency: 3
+        poll-timeout: 1000
       bootstrap-servers: localhost:29093

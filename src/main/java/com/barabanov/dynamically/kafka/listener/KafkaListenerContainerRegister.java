@@ -2,8 +2,6 @@ package com.barabanov.dynamically.kafka.listener;
 
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.context.event.EventListener;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.config.KafkaListenerEndpoint;
 import org.springframework.kafka.config.KafkaListenerEndpointRegistry;
@@ -13,9 +11,10 @@ import javax.annotation.PostConstruct;
 import java.util.List;
 import java.util.Map;
 
+
 @AllArgsConstructor
 @Service
-public class KafkaConsumerRegisterService {
+public class KafkaListenerContainerRegister {
 
     private final KafkaListenerEndpointRegistry kafkaListenerEndpointRegistry;
 
