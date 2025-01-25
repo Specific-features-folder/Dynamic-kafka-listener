@@ -7,13 +7,16 @@ import org.springframework.kafka.listener.MessageListener;
 
 @Slf4j
 @RequiredArgsConstructor
-public class KafkaMessageListenerImpl implements MessageListener<String, Object> {
+public class KafkaMessageListenerImpl<K, V> implements MessageListener<K, V> {
 
     private final String kafkaName;
+    private final KafkaMessageHandler<V> kafkaMessageHandler;
 
 
     @Override
-    public void onMessage(ConsumerRecord<String, Object> data) {
-      log.info("Обрабатываем запись: {}, из кафки {}", data, kafkaName);
+    public void onMessage(ConsumerRecord<K, V> consumerRecord) {
+        log.info("Получена запись из кафки {} из топика {}", kafkaName, consumerRecord.topic());
+
+        kafkaMessageHandler.handle(consumerRecord.value());
     }
 }

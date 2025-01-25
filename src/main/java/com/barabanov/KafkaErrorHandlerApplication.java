@@ -1,15 +1,13 @@
 package com.barabanov;
 
-import com.barabanov.dynamically.kafka.listener.KafkaShardsProperties;
+import com.barabanov.dynamically.kafka.listener.KafkaConsumerRegisterService;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.kafka.core.KafkaTemplate;
 
-import java.time.Instant;
-import java.util.List;
+import java.util.Arrays;
 import java.util.Scanner;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -37,8 +35,7 @@ public class KafkaErrorHandlerApplication {
 //			kafkaTemplate.send("car-topic", new Car("model-" + currentRandom.nextInt(),
 //					Instant.now()));
 
-		KafkaShardsProperties kafkaShardsProperties = context.getBean(KafkaShardsProperties.class);
-		System.out.println();
+//		System.out.println(Arrays.toString(context.getBeanFactory().getSingletonNames()));
 	}
 
 }

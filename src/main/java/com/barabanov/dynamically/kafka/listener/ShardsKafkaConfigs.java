@@ -8,12 +8,12 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import java.util.Map;
 
-@ConfigurationProperties(prefix = "kafka.shard")
-public record KafkaShardsProperties(
-        Map<String, KafkaShardProperties> config) {
+@ConfigurationProperties(prefix = "shards.kafka")
+public record ShardsKafkaConfigs(
+        Map<String, ShardKafkaConfig> config) {
 
 
-    public record KafkaShardProperties(
+    public record ShardKafkaConfig(
             Map<String, String> topics,
             ShardKafkaProperties properties
     ) {}

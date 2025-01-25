@@ -37,6 +37,50 @@ services:
     networks:
       - common-net
 
+  zookeeper_common:
+    container_name: zookeeper_common
+    image: confluentinc/cp-zookeeper:latest
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+      ZOOKEEPER_SYNC_LIMIT: 2
+    healthcheck:
+      test: nc -z localhost 2181 || exit -1
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    ports:
+      - 22183:2181
+    networks:
+      - common-net
+
+  kafka_common:
+    container_name: kafka_common
+    image: confluentinc/cp-kafka:latest
+    networks:
+      - common-net
+    environment:
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka_common:9093
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper_common:2181
+      KAFKA_BROKER_ID: 2
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    restart: on-failure
+    ports:
+      - 9093:9093
+    healthcheck:
+      test: nc -z localhost 9093 || exit -1
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    depends_on:
+      zookeeper_common:
+        condition: service_healthy
+    volumes:
+      - ./volumes/kafka_common/data:/var/lib/kafka/data
+
   kafka_0:
     container_name: kafka_0
     image: confluentinc/cp-kafka:latest
@@ -44,7 +88,7 @@ services:
       - common-net
     environment:
       KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:29092
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://127.0.0.1:29092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka_0:29092
       KAFKA_ZOOKEEPER_CONNECT: zookeeper_0:2181
       KAFKA_BROKER_ID: 0
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
@@ -52,7 +96,7 @@ services:
     ports:
       - 29092:29092
     healthcheck:
-      test: nc -z localhost 9092 || exit -1
+      test: nc -z localhost 29092 || exit -1
       interval: 5s
       timeout: 5s
       retries: 10
@@ -70,7 +114,7 @@ services:
       - common-net
     environment:
       KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:29093
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://127.0.0.1:29093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka_1:29093
       KAFKA_ZOOKEEPER_CONNECT: zookeeper_1:2181
       KAFKA_BROKER_ID: 1
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
@@ -78,7 +122,7 @@ services:
     ports:
       - 29093:29093
     healthcheck:
-      test: nc -z localhost 9092 || exit -1
+      test: nc -z localhost 29093 || exit -1
       interval: 5s
       timeout: 5s
       retries: 10
@@ -99,11 +143,14 @@ services:
     restart: always
     environment:
       - KAFKA_CLUSTERS_0_NAME=shard_1
-      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka_0:9092
+      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka_0:29092
       - KAFKA_CLUSTERS_0_ZOOKEEPER=zookeeper_0:2181
       - KAFKA_CLUSTERS_1_NAME=shard_2
-      - KAFKA_CLUSTERS_1_BOOTSTRAPSERVERS=kafka_1:9092
+      - KAFKA_CLUSTERS_1_BOOTSTRAPSERVERS=kafka_1:29093
       - KAFKA_CLUSTERS_1_ZOOKEEPER=zookeeper_1:2181
+      - KAFKA_CLUSTERS_2_NAME=common
+      - KAFKA_CLUSTERS_2_BOOTSTRAPSERVERS=kafka_common:9093
+      - KAFKA_CLUSTERS_2_ZOOKEEPER=zookeeper_common:2181
 
   postgres:
     image: postgres:latest
@@ -123,53 +170,9 @@ services:
     networks:
       - common-net
 
-
-  zookeeper:
-    container_name: zookeeper
-    image: confluentinc/cp-zookeeper:latest
-    environment:
-      ZOOKEEPER_CLIENT_PORT: 2181
-      ZOOKEEPER_TICK_TIME: 2000
-      ZOOKEEPER_SYNC_LIMIT: 2
-    healthcheck:
-      test: nc -z localhost 2181 || exit -1
-      interval: 5s
-      timeout: 5s
-      retries: 10
-      start_period: 10s
-    ports:
-      - 22183:2181
-    networks:
-      - common-net
-
-  kafka:
-    container_name: kafka
-    image: confluentinc/cp-kafka:latest
-    networks:
-      - common-net
-    environment:
-      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9093
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://127.0.0.1:9093
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_BROKER_ID: 2
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-    restart: on-failure
-    ports:
-      - 9093:9093
-    healthcheck:
-      test: nc -z localhost 9093 || exit -1
-      interval: 5s
-      timeout: 5s
-      retries: 10
-      start_period: 10s
-    depends_on:
-      zookeeper:
-        condition: service_healthy
-    volumes:
-      - ./volumes/kafka/data:/var/lib/kafka/data
-
 networks:
   common-net:
 
+# для подключения кафка контейнеров к локальной машине не забыть поправить host файл, ведь подключения будут с таким же хостом, что и в KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS
 # psql -U postgres -c "CREATE DATABASE my_database;"
 # kafka-topics --create --topic car-topic --bootstrap-server localhost:9092 --partitions 3 --replication-factor 1
