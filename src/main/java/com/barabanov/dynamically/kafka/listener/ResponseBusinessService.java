@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 public class ResponseBusinessService implements KafkaMessageHandler<Response> {
 
     private final KafkaTemplate<String, Object> commonKafkaTemplate;
-    @Value("subsystem-request-topic")
+    @Value("${kafka-config.request-topic-name}")
     private final String requestCommonTopic;
 
 

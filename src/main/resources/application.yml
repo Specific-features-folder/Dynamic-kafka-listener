@@ -17,6 +17,7 @@ spring:
 
 kafka-config:
   request-topic-name: subsystem-request-topic
+  response-topic-name: subsystem-response-topic
 
 #    #listener:
 #     # concurrency: 1

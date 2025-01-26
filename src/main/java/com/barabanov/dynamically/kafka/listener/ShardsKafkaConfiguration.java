@@ -22,7 +22,8 @@ import java.util.*;
 @Configuration
 public class ShardsKafkaConfiguration {
 
-    private static final String REQUEST_TOPIC_PROPERTY = "request-topic";
+    public static final String REQUEST_TOPIC_PROPERTY = "request-topic";
+    public static final String RESPONSE_TOPIC_PROPERTY = "response-topic";
 
 
     @Bean
@@ -145,6 +146,22 @@ public class ShardsKafkaConfiguration {
         }
 
         return shardsKafkaTemplates;
+    }
+
+
+    @Bean
+    public Map<String, Map<String, String>> shardsTopicsMap(ShardsKafkaConfigs shardsKafkaConfigs) {
+
+        Map<String, ShardKafkaConfig> shardsKafkaConfigMap = shardsKafkaConfigs.config();
+        if (CollectionUtils.isEmpty(shardsKafkaConfigMap))
+            return Collections.emptyMap();
+
+        Map<String, Map<String, String>> shardsTopicsMap = new HashMap<>();
+
+        for (Map.Entry<String, ShardKafkaConfig> shardKafkaConfig : shardsKafkaConfigMap.entrySet())
+            shardsTopicsMap.put(shardKafkaConfig.getKey(), shardKafkaConfig.getValue().topics());
+
+        return shardsTopicsMap;
     }
 
 }
