@@ -23,7 +23,7 @@ import java.sql.SQLException;
 import java.time.LocalDateTime;
 
 @Slf4j
-@Component
+//@Component
 public class KafkaCommonErrorHandler implements CommonErrorHandler {
 
     private final static long MSG_PROCESSING_ATTEMPTS = 3L;

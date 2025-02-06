@@ -1,11 +1,14 @@
 package com.barabanov;
 
+import com.barabanov.dynamically.kafka.listener.Response;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.kafka.core.KafkaTemplate;
 
+import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.util.Scanner;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -25,9 +28,9 @@ public class KafkaErrorHandlerApplication {
 //			kafkaTemplate.send("car-topic", new Car(name,
 //					Instant.now()));
 //		});
-//		for (int i = 0; i < 4_000_000; i++) {
-//			kafkaTemplate.send("car-topic", new Car("model-" + i,
-//					Instant.now()));
+//		for (int i = 0; i < 4_000; i++) {
+//			kafkaTemplate.send("request-topic", new Response("msg-" + i,
+//					OffsetDateTime.now()));
 //		}
 //		while (scanner.nextLine().equals("send"))
 //			kafkaTemplate.send("car-topic", new Car("model-" + currentRandom.nextInt(),

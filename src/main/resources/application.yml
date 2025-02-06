@@ -54,10 +54,13 @@ shards.kafka.config:
       consumer:
         value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
         key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-        group-id: abcd
+        group-id: my_group_id
+        auto-offset-reset: earliest
+        max-poll-records: 300
         properties:
           spring.json.trusted.packages: "*"
       listener:
-        concurrency: 3
-        poll-timeout: 1000
+        type: batch
+        concurrency: 1
+#        poll-timeout: 1000
       bootstrap-servers: localhost:29093
