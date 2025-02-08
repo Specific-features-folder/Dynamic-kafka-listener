@@ -78,6 +78,12 @@ public class ShardsKafkaConfiguration {
         Method onMessageMethod = ReflectionUtils.findMethod(KafkaMessageListenerImpl.class, "onMessage", List.class);
         kafkaListenerEndpoint.setMethod(Objects.requireNonNull(onMessageMethod));
 
+        kafkaListenerEndpoint.setBatchListener(true);
+        Properties endPoindProperties = new Properties();
+        endPoindProperties.put("spring.json.trusted.packages", "*"); // TODO: а будут ли работать другие consumer.properties из application? Попробовать часть сюда написать, а часть туда
+        endPoindProperties.put("spring.json.value.default.type", "com.barabanov.dynamically.kafka.listener.Response");
+        kafkaListenerEndpoint.setConsumerProperties(endPoindProperties);
+
         return kafkaListenerEndpoint;
     }
 

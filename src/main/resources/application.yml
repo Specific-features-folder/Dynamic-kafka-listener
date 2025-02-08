@@ -11,7 +11,7 @@ spring:
     consumer:
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      group-id: abcccccccccccccccc
+      group-id: abc
 
     bootstrap-servers: localhost:9093
 
@@ -26,22 +26,22 @@ kafka-config:
 #     # auto-create: true
 
 shards.kafka.config:
-  shard-a:
-    topics:
-      request-topic: request-topic
-      response-topic: response-topic
-    properties:
-      producer:
-        value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
-        key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      consumer:
-        value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
-        key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-        group-id: abcr
-        properties:
-          spring.json.trusted.packages: "*"
-          spring.json.value.default.type: "com.barabanov.dynamically.kafka.listener.Response"
-      bootstrap-servers: localhost:29092
+#  shard-a:
+#    topics:
+#      request-topic: request-topic
+#      response-topic: response-topic
+#    properties:
+#      producer:
+#        value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+#        key-serializer: org.apache.kafka.common.serialization.StringSerializer
+#      consumer:
+#        value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+#        key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+#        group-id: abcr
+#        properties:
+#          spring.json.trusted.packages: "*"
+#          spring.json.value.default.type: "com.barabanov.dynamically.kafka.listener.Response"
+#      bootstrap-servers: localhost:29092
 
   shard-b:
     topics:
@@ -57,10 +57,10 @@ shards.kafka.config:
         group-id: my_group_id
         auto-offset-reset: earliest
         max-poll-records: 300
-        properties:
-          spring.json.trusted.packages: "*"
+#        properties:
+#          spring.json.trusted.packages: "*"
       listener:
-        type: batch
+#        type: batch
         concurrency: 1
 #        poll-timeout: 1000
       bootstrap-servers: localhost:29093
