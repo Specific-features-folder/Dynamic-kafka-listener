@@ -1,9 +1,4 @@
 spring:
-  datasource:
-    password: pass
-    username: postgres
-    url: jdbc:postgresql://localhost:5432/my_database
-
   kafka:
     producer:
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
@@ -15,52 +10,46 @@ spring:
 
     bootstrap-servers: localhost:9093
 
-kafka-config:
-  request-topic-name: subsystem-request-topic
-  response-topic-name: subsystem-response-topic
+kafka-topics:
+  request-topic-name: common-request-topic
+  response-topic-name: common-response-topic
 
-#    #listener:
-#     # concurrency: 1
-#     # poll-timeout: 1000
-#    #admin:
-#     # auto-create: true
 
-shards.kafka.config:
-#  shard-a:
-#    topics:
-#      request-topic: request-topic
-#      response-topic: response-topic
-#    properties:
-#      producer:
-#        value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
-#        key-serializer: org.apache.kafka.common.serialization.StringSerializer
-#      consumer:
-#        value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
-#        key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-#        group-id: abcr
-#        properties:
-#          spring.json.trusted.packages: "*"
-#          spring.json.value.default.type: "com.barabanov.dynamically.kafka.listener.Response"
-#      bootstrap-servers: localhost:29092
-
-  shard-b:
-    topics:
-      request-topic: request-topic
-      response-topic: response-topic
-    properties:
-      producer:
-        value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
-        key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      consumer:
-        value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
-        key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-        group-id: my_group_id
-        auto-offset-reset: earliest
-        max-poll-records: 300
-#        properties:
-#          spring.json.trusted.packages: "*"
-      listener:
-#        type: batch
-        concurrency: 1
-#        poll-timeout: 1000
-      bootstrap-servers: localhost:29093
+shard.configs:
+  - shard-name: shard-a
+    kafka-config:
+      request-topic-name: shard-a-request-topic
+      response-topic-name: shard-a-response-topic
+      properties:
+        producer:
+          value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+          key-serializer: org.apache.kafka.common.serialization.StringSerializer
+        consumer:
+          value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+          key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+          group-id: abcr
+          properties:
+            spring.json.trusted.packages: "*"
+            spring.json.value.default.type: "com.barabanov.dynamically.kafka.listener.Response"
+        bootstrap-servers: localhost:29092
+  - shard-name: shard-b
+    kafka-config:
+      request-topic-name: shard-b-request-topic
+      response-topic-name: shard-b-response-topic
+      properties:
+        producer:
+          value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+          key-serializer: org.apache.kafka.common.serialization.StringSerializer
+        consumer:
+          value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+          key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+          group-id: my_group_id
+          auto-offset-reset: earliest
+          max-poll-records: 300
+        #        properties:
+        #          spring.json.trusted.packages: "*"
+        listener:
+          #        type: batch
+          concurrency: 1
+        #        poll-timeout: 1000
+        bootstrap-servers: localhost:29093

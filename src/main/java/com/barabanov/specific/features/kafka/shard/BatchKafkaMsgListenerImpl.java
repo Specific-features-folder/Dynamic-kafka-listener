@@ -1,4 +1,4 @@
-package com.barabanov.dynamically.kafka.listener;
+package com.barabanov.specific.features.kafka.shard;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,19 +11,22 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * Тело метода onMessage аналогично телу метода с @KafkaListener аннотацией.
+ */
 @Slf4j
 @RequiredArgsConstructor
-public class KafkaMessageListenerImpl<K, V> implements BatchMessageListener<K, V> {
+public class BatchKafkaMsgListenerImpl<K, V> implements BatchMessageListener<K, V> {
 
-    private final String kafkaName;
-    private final BatchKafkaMessageHandler<V> batchKafkaMessageHandler;
+    private final String shardName;
+    private final BatchShardKafkaMsgHandler<V> batchShardKafkaMsgHandler;
 
 
     @Override
     public void onMessage(List<ConsumerRecord<K, V>> data) {
         try {
             if (CollectionUtils.isEmpty(data)) {
-                log.warn("Получен пустой батч из кафки {}", kafkaName);
+                log.warn("Получен пустой батч из кафки шарды {}", shardName);
                 return;
             }
             List<V> valueList = new ArrayList<>();
@@ -32,9 +35,9 @@ public class KafkaMessageListenerImpl<K, V> implements BatchMessageListener<K, V
                 valueList.add(consumerRecord.value());
                 topics.add(consumerRecord.topic());
             }
-            log.info("Получен батч из кафки {} размером {} из топиков {}", kafkaName, data.size(), topics);
+            log.info("Получен батч из кафки шарды {} размером {} из топиков {}", shardName, data.size(), topics);
 
-            batchKafkaMessageHandler.handle(valueList);
+            batchShardKafkaMsgHandler.handle(valueList, shardName);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }

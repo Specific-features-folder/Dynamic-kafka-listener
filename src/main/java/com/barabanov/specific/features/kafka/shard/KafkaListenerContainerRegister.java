@@ -1,18 +1,18 @@
-package com.barabanov.dynamically.kafka.listener;
+package com.barabanov.specific.features.kafka.shard;
 
-import lombok.AllArgsConstructor;
+import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.config.KafkaListenerEndpoint;
 import org.springframework.kafka.config.KafkaListenerEndpointRegistry;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
 import java.util.List;
 import java.util.Map;
 
 
-@AllArgsConstructor
+@RequiredArgsConstructor
 @Service
 public class KafkaListenerContainerRegister {
 
@@ -30,7 +30,8 @@ public class KafkaListenerContainerRegister {
         for (Map.Entry<String, List<KafkaListenerEndpoint>> shardKafkaEndpoints : shardsKafkaEndpoints.entrySet()) {
             String shardName = shardKafkaEndpoints.getKey();
             for (KafkaListenerEndpoint kafkaListenerEndpoint : shardKafkaEndpoints.getValue()) {
-                //TODO: а нужно ли тут true
+
+                // Тут вроде бы можно обойтись и без true
                 kafkaListenerEndpointRegistry.registerListenerContainer(
                         kafkaListenerEndpoint,
                         shardsKafkaListenerContainerFactories.get(shardName),

@@ -1,5 +1,4 @@
-version: "3.9"
-name: kafka-error-handler
+name: dynamic-kafka-listener
 services:
   zookeeper_0:
     container_name: zookeeper_0
@@ -152,27 +151,8 @@ services:
       - KAFKA_CLUSTERS_2_BOOTSTRAPSERVERS=kafka_common:9093
       - KAFKA_CLUSTERS_2_ZOOKEEPER=zookeeper_common:2181
 
-  postgres:
-    image: postgres:latest
-    ports:
-      - "5432:5432"
-    environment:
-      - POSTGRES_PASSWORD=pass
-      - POSTGRES_USER=postgres
-    healthcheck:
-      test: [ "CMD-SHELL", "sh -c 'pg_isready -U postgres -d postgres'" ]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-      start_period: 10s
-    volumes:
-      - ./volumes/postgres/database:/var/lib/postgresql/data
-    networks:
-      - common-net
-
 networks:
   common-net:
 
 # для подключения кафка контейнеров к локальной машине не забыть поправить host файл, ведь подключения будут с таким же хостом, что и в KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS
-# psql -U postgres -c "CREATE DATABASE my_database;"
 # kafka-topics --create --topic car-topic --bootstrap-server localhost:9092 --partitions 3 --replication-factor 1
