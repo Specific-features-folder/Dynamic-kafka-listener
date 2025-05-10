@@ -33,9 +33,11 @@ import java.util.*;
 public class ShardKafkaConfiguration {
 
     private final List<ShardConfig> shardConfigsList;
+    private final KafkaProperties shardKafkaProperties;
 
     public ShardKafkaConfiguration(ShardsConfig shardsConfig) {
-        shardConfigsList = shardsConfig.configs();
+        this.shardConfigsList = shardsConfig.configs();
+        this.shardKafkaProperties = shardsConfig.kafkaProperties();
     }
 
 
@@ -146,15 +148,17 @@ public class ShardKafkaConfiguration {
 
         Map<String, ConcurrentKafkaListenerContainerFactory<Object, Object>> shardsKafkaListenerContainerFactories = new HashMap<>();
         for (ShardConfig shardConfig : this.shardConfigsList) {
-            KafkaProperties shardKafkaProperties = shardConfig.kafkaConfig().properties();
+            // Это не очень хорошо, но у KafkaProperties нет копирующего конструктора, а при таком использовании вроде бы не возникает проблем
+            this.shardKafkaProperties.setBootstrapServers(shardConfig.kafkaConfig().bootstrapServers());
 
-            DefaultKafkaConsumerFactory<Object, Object> kafkaConsumerFactory = new DefaultKafkaConsumerFactory<>(shardKafkaProperties.buildConsumerProperties());
+            DefaultKafkaConsumerFactory<Object, Object> kafkaConsumerFactory = new DefaultKafkaConsumerFactory<>(this.shardKafkaProperties.buildConsumerProperties());
             ConcurrentKafkaListenerContainerFactory<Object, Object> kafkaListenerContainerFactory = configureListenerContainerFactory(
                     new ConcurrentKafkaListenerContainerFactory<>(),
                     kafkaConsumerFactory,
-                    shardKafkaProperties);
+                    this.shardKafkaProperties);
 
             shardsKafkaListenerContainerFactories.put(shardConfig.shardName(), kafkaListenerContainerFactory);
+            this.shardKafkaProperties.setBootstrapServers(null);
         }
 
         return shardsKafkaListenerContainerFactories;
@@ -196,9 +200,12 @@ public class ShardKafkaConfiguration {
             String shardName = shardConfig.shardName();
             log.info("Создаётся KafkaTemplate для шарды {}", shardName);
 
-            DefaultKafkaProducerFactory<String, Object> kafkaProducerFactory = new DefaultKafkaProducerFactory<>(shardConfig.kafkaConfig().properties().buildProducerProperties());
+            this.shardKafkaProperties.setBootstrapServers(shardConfig.kafkaConfig().bootstrapServers());
+            DefaultKafkaProducerFactory<String, Object> kafkaProducerFactory = new DefaultKafkaProducerFactory<>(this.shardKafkaProperties.buildProducerProperties());
             KafkaTemplate<String, Object> kafkaTemplate = new KafkaTemplate<>(kafkaProducerFactory);
             shardsKafkaTemplates.put(shardName, kafkaTemplate);
+
+            this.shardKafkaProperties.setBootstrapServers(null);
         }
 
         return shardsKafkaTemplates;

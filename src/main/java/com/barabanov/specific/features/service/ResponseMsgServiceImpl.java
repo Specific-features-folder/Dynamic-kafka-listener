@@ -29,7 +29,7 @@ public class ResponseMsgServiceImpl implements ResponseMsgService {
         String shardName = ThreadLocalRandom.current().nextInt() % 2 == 0
                 ? "shard-a"
                 : "shard-b";
-        log.info("Обрабатывается response с Message {}. Он перенаправляется в шарду {}", response.message(), shardName);
+        log.info("Обрабатывается response с message: {}. Он перенаправляется в шарду {}", response.message(), shardName);
 
         Map<ShardWritableTopic, String> shardTopics = shardsTopics.get(shardName);
         KafkaTemplate<String, Object> shardKafkaTemplate = shardsKafkaTemplates.get(shardName);
