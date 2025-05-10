@@ -189,15 +189,15 @@ public class ShardKafkaConfiguration {
 
 
     @Bean
-    public Map<String, KafkaTemplate<Object, Object>> shardsKafkaTemplates() {
+    public Map<String, KafkaTemplate<String, Object>> shardsKafkaTemplates() {
 
-        Map<String, KafkaTemplate<Object, Object>> shardsKafkaTemplates = new HashMap<>();
+        Map<String, KafkaTemplate<String, Object>> shardsKafkaTemplates = new HashMap<>();
         for (ShardConfig shardConfig : this.shardConfigsList) {
             String shardName = shardConfig.shardName();
             log.info("Создаётся KafkaTemplate для шарды {}", shardName);
 
-            DefaultKafkaProducerFactory<Object, Object> kafkaProducerFactory = new DefaultKafkaProducerFactory<>(shardConfig.kafkaConfig().properties().buildProducerProperties());
-            KafkaTemplate<Object, Object> kafkaTemplate = new KafkaTemplate<>(kafkaProducerFactory);
+            DefaultKafkaProducerFactory<String, Object> kafkaProducerFactory = new DefaultKafkaProducerFactory<>(shardConfig.kafkaConfig().properties().buildProducerProperties());
+            KafkaTemplate<String, Object> kafkaTemplate = new KafkaTemplate<>(kafkaProducerFactory);
             shardsKafkaTemplates.put(shardName, kafkaTemplate);
         }
 

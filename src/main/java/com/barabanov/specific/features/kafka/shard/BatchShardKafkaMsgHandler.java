@@ -4,5 +4,5 @@ import java.util.List;
 
 public interface BatchShardKafkaMsgHandler<V> {
 
-    void handle(List<V> msg, String shardName);
+    void handle(List<V> msgList, String shardName);
 }

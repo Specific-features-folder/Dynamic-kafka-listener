@@ -30,7 +30,6 @@ shard.configs:
           group-id: abcr
           properties:
             spring.json.trusted.packages: "*"
-            spring.json.value.default.type: "com.barabanov.dynamically.kafka.listener.Response"
         bootstrap-servers: localhost:29092
   - shard-name: shard-b
     kafka-config:
@@ -43,13 +42,13 @@ shard.configs:
         consumer:
           value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
           key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-          group-id: my_group_id
+          group-id: my_group_id_new
           auto-offset-reset: earliest
           max-poll-records: 300
-        #        properties:
-        #          spring.json.trusted.packages: "*"
+          properties:
+            spring.json.trusted.packages: "*"
         listener:
-          #        type: batch
-          concurrency: 1
+          type: batch
+          concurrency: 2
         #        poll-timeout: 1000
         bootstrap-servers: localhost:29093
