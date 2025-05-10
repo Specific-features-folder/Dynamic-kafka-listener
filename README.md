@@ -22,3 +22,72 @@
 
 
 <br>`Реализации разделены по веткам, в main ветку слиты все ветки. Конкретные реализации нужно смотреть по отдельным веткам.`
+
+
+### <br><br>Немного используемой теории по сущностям spring-kafka и их связям друг с другом<br>
+#### 1. DefaultKafkaConsumerFactory
+**Описание <br>**
+   Это фабрика, которая используется для создания и настройки экземпляров Kafka-потребителей (KafkaConsumer).
+   Она принимает Map<String, Object> с настройками, которые передаются в KafkaConsumer.
+   Реализует интерфейс ConsumerFactory.
+**<br> Примеры того, что можно настраивать <br>**
+* Основные настройки Kafka-потребителя:
+  * bootstrap.servers — адреса брокеров Kafka.
+  * group.id — идентификатор группы потребителей.
+  * key.deserializer — десериализатор для ключа сообщения (например, StringDeserializer).
+  * value.deserializer — десериализатор для значения сообщения (например, JsonDeserializer).
+  * auto.offset.reset, enable.auto.commit, max.poll.records
+* Настройки для JsonDeserializer:
+  * spring.json.trusted.packages — доверенные пакеты для десериализации JSON.
+  * spring.json.value.default.type — тип по умолчанию для десериализации JSON.
+
+#### <br>2. ConcurrentKafkaListenerContainerFactory
+**Описание <br>**
+ConcurrentKafkaListenerContainerFactory является фабрикой и используется для создания контейнеров (ConcurrentMessageListenerContainer), которые управляют Kafka-потребителями.
+Эти контейнеры запускают несколько потоков для обработки сообщений из Kafka.
+Она использует ConsumerFactory для создания kafka-потребителей и может донастраивать их поведение.
+**<br> Примеры того, что можно настраивать <br>**
+* Количество потоков (concurrency).
+   Указывает, сколько потоков будет обрабатывать сообщения. Например, если concurrency = 3, то будет создано 3 потока для обработки сообщений.
+* Поведение контейнера:
+  * setAutoStartup(boolean autoStartup) — указывает, должен ли контейнер запускаться автоматически.
+  * setAckMode(ContainerProperties.AckMode ackMode) — настраивает режим подтверждения (например, RECORD, BATCH, MANUAL).
+  * setBatchListener(true) — включает режим пакетной обработки сообщений.
+* Обработку ошибок:
+  * setErrorHandler(ErrorHandler errorHandler) — указывает обработчик ошибок
+  * setRetryTemplate(RetryTemplate retryTemplate) — настраивает повторные попытки обработки сообщений.
+
+#### <br>3. ConcurrentMessageListenerContainer
+**Описание <br>**
+Это контейнер, который непосредственно управляет Kafka-потребителями и запускает их в нескольких потоках. Он создается с помощью ConcurrentKafkaListenerContainerFactory.
+Реализует интерфейс MessageListenerContainer и которая запускает несколько экземпляров KafkaMessageListenerContainer (по одному на каждый поток).
+**<br> Примеры того, что можно настраивать <br>**
+В целом настраивает контейнер ConcurrentKafkaListenerContainerFactory, но можно и вручную переопределить его параметры
+* Количество потоков (concurrency)
+* Поведение контейнера (Настраивается через ContainerProperties):
+  * setAckMode(ContainerProperties.AckMode ackMode) — режим подтверждения.
+  * setMessageListener(MessageListener<?, ?> messageListener) — устанавливает обработчик сообщений.
+  * setPollTimeout(long timeout) — таймаут для опроса Kafka.
+
+#### <br>4. MethodKafkaListenerEndpoint
+**Описание <br>**
+Используется для настройки конечной точки (endpoint) для обработки сообщений Kafka. Kafka-endpoint описывает, как обрабатывать сообщения из Kafka.
+Он связывает метод (через рефлексию) с топиком Kafka. Реализует интерфейс KafkaListenerEndpoint.
+
+**<br> Примеры того, что можно настраивать <br>**
+* Топики (из каких топиков читать сообщения)
+* Группу потребителей
+* Метод обработки (указывает метод, который будет вызываться для обработки сообщений. При использовании @KafkaListener это будет метод, над которым висит аннотация)
+* id — уникальный идентификатор конечной точки.
+* concurrency — количество потоков для обработки здесь тоже можно задать
+* errorHandler - обработчик ошибок здесь тоже можно задать
+
+#### <br>Связь между этими классами
+1. DefaultKafkaConsumerFactory создает kafka-потребителей.
+2. ConcurrentKafkaListenerContainerFactory использует DefaultKafkaConsumerFactory при создании контейнеров (ConcurrentMessageListenerContainer) для создания kafka-потребителей.
+3. ConcurrentMessageListenerContainer управляет KafkaMessageListenerContainer'ами т.е. управляет потоками для обработки сообщений.
+4. KafkaMessageListenerContainer управляет kafka-потребителем
+5. MethodKafkaListenerEndpoint связывает метод для обработки с топиками kafka, указывая как обрабатывать сообщения.
+6. KafkaListenerEndpointRegistry связывает kafka-endpoint с ConcurrentKafkaListenerContainerFactory. 
+   Т.е. связывает топик + указание какой метод вызывать для обработки сообщения из этого топика с фабрикой, которая создаст контейнеры. 
+   Контейнеры же будут используя kafka-потребители получать из указанных в kafka-endpoint топиков сообщения и вызывать метод для из обработки, указанные в kafka-endpoint
