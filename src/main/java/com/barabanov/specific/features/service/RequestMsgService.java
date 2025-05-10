@@ -2,7 +2,6 @@ package com.barabanov.specific.features.service;
 
 import com.barabanov.specific.features.kafka.dto.Request;
 import com.barabanov.specific.features.kafka.shard.BatchShardKafkaMsgHandler;
-import com.barabanov.specific.features.kafka.shard.ShardKafkaMsgHandler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,7 +27,7 @@ public class RequestMsgService implements BatchShardKafkaMsgHandler<Request> {
         log.info("Обрабатывается batch request c messages: {}. Они отправляются в Common",
                 msgList.stream()
                         .map(Request::message)
-                        .collect(Collectors.joining(",", "{", "}")));
+                        .collect(Collectors.joining(", ", "{", "}")));
 
         for (Request request : msgList)
             commonKafkaTemplate.send(commonRequestTopicName, request);
